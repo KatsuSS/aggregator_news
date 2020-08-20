@@ -1,0 +1,14 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Agregator</title>
+      {% else %}
+      <title>Welcome to Agregator</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Agregator: <a href="/">Home</a></div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>
