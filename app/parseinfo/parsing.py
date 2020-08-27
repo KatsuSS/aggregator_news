@@ -1,6 +1,22 @@
 from bs4 import BeautifulSoup
 import aiohttp
 import asyncio
+from datetime import datetime, timedelta
+import re
+
+
+def format_time(create_time):
+    if "ВЧЕРА" in create_time:
+        time = datetime.now() - timedelta(days=1)
+    else:
+        time = datetime.now()
+    try:
+        hour, minute = re.search(r'\d{1,2}:\d{2}', create_time).group(0).split(':')
+    except AttributeError as e:
+        print(f"Не получилось выделить время {e}")
+        hour, minute = time.hour, time.minute
+    time = datetime(year=time.year, month=time.month, day=time.day, hour=int(hour), minute=int(minute))
+    return time
 
 
 class Requestor:
@@ -34,10 +50,10 @@ class Requestor:
                 title = ad.find(["h2", "h3"], class_="post-title").getText().strip()
                 link = ad.find("a", class_="post-link")['href']
                 create_time = ad.find("li", class_="meta-time").getText().strip()
-            except Exception as e:
+            except AttributeError as e:
                 create_time = ad.find("span", class_="post-time").getText().strip()
-                print(key)
                 print(e)
+            create_time = format_time(create_time)
             data[key] = {"title": title,
                          "name": "the-village",
                          "link": url + link,
@@ -55,8 +71,9 @@ class Requestor:
                 title = ad.find("a", class_="news-feed__title").getText().strip().replace(break_space, ' ')
                 create_time = ad.find("span", class_="news-feed__datetime").getText().strip()
                 link = ad.find("a", class_="news-feed__title")['href']
-            except Exception as e:
+            except AttributeError as e:
                 print(e)
+            create_time = format_time(create_time)
             data[key] = {"title": title,
                          "name": "afisha",
                          "link": url + link,
@@ -78,3 +95,10 @@ class Requestor:
         # loop = asyncio.get_event_loop()
         data = loop.run_until_complete(self._create_task(self.url))
         return data
+
+#
+# if __name__ == "__main__":
+#     res = Requestor(["https://daily.afisha.ru/news/", "https://www.the-village.ru/news"])
+#     news = res.get_request()
+#     from pprint import pprint
+#     pprint(news)
