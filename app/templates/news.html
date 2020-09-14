@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h3>{{ title }}</h3>
+        {% for new in news %}
+            <div><p>{{ new.header }}</p><p>Link: <a href="{{ new.link }}">Подробнее</a></p></div>
+        {% endfor %}
+    <span>Страницы: </span>
+    {% if prev_url %}
+    <a href="{{ prev_url }}">Предыдущая </a>
+    {% endif %}
+    {% if next_url %}
+    <a href="{{ next_url }}">Следующая </a>
+    {% endif %}
+{% endblock %}

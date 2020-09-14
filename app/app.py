@@ -16,12 +16,18 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from app.parseinfo.scheduler import add_news
+    from app.utils.scheduler import add_news
     scheduler = BackgroundScheduler()
-    scheduler.add_job(add_news, 'interval', args=[app, db], minutes=10)
+    scheduler.add_job(add_news, 'interval', args=[app, db], seconds=10)
     scheduler.start()
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+
+    from app.api import bp as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
+
+    from app.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
 
     return app

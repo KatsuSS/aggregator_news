@@ -3,6 +3,10 @@ import aiohttp
 import asyncio
 from datetime import datetime, timedelta
 import re
+from app.utils.logger import init_logger
+
+
+logger = init_logger()
 
 
 def format_time(create_time):
@@ -13,7 +17,7 @@ def format_time(create_time):
     try:
         hour, minute = re.search(r'\d{1,2}:\d{2}', create_time).group(0).split(':')
     except AttributeError as e:
-        print(f"Не получилось выделить время {e}")
+        logger.info(f"Не получилось выделить время {e}")
         hour, minute = time.hour, time.minute
     time = datetime(year=time.year, month=time.month, day=time.day, hour=int(hour), minute=int(minute))
     return time
@@ -21,7 +25,7 @@ def format_time(create_time):
 
 class Requestor:
     def __init__(self, url):
-        self.url = url # base_url = ["https://daily.afisha.ru/news/", "https://www.the-village.ru/news"]
+        self.url = url
 
     async def _get_page(self, session, url):
         try:
@@ -38,7 +42,7 @@ class Requestor:
         elif "afisha" in url:
             return self._get_info_afisha(soup)
         else:
-            print("Empty")
+            logger.info(f"Пустая страница")
             return []
 
     def _get_info_village(self, soup):
@@ -49,10 +53,15 @@ class Requestor:
             try:
                 title = ad.find(["h2", "h3"], class_="post-title").getText().strip()
                 link = ad.find("a", class_="post-link")['href']
+            except AttributeError as e:
+                logger.error(f"Tags changed village: {e}")
+                continue
+            try:
                 create_time = ad.find("li", class_="meta-time").getText().strip()
             except AttributeError as e:
-                create_time = ad.find("span", class_="post-time").getText().strip()
                 print(e)
+                logger.info(f"Different fields: {e}")
+                create_time = ad.find("span", class_="post-time").getText().strip()
             create_time = format_time(create_time)
             data[key] = {"title": title,
                          "name": "the-village",
@@ -72,7 +81,8 @@ class Requestor:
                 create_time = ad.find("span", class_="news-feed__datetime").getText().strip()
                 link = ad.find("a", class_="news-feed__title")['href']
             except AttributeError as e:
-                print(e)
+                logger.error(f"Tags changed afisha: {e}")
+                continue
             create_time = format_time(create_time)
             data[key] = {"title": title,
                          "name": "afisha",

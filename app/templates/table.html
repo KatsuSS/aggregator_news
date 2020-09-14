@@ -3,10 +3,10 @@
 {% block content %}
     <h3>Afisha news</h3>
         {% for new in news_afisha %}
-            <div><p>{{ new.header }} says: </p><p>Link: <a href="{{ new.link }}">Подробнее</a></p></div>
+            <div><p>{{ new.header }}</p><p>Link: <a href="{{ new.link }}">Подробнее</a></p></div>
         {% endfor %}
     <h3>The-Village news</h3>
         {% for new in news_village %}
-            <div><p>{{ new.header }} says: </p><p><a href="{{ new.link }}">Подробнее</a></p></div>
+            <div><p>{{ new.header }}</p><p><a href="{{ new.link }}">Подробнее</a></p></div>
         {% endfor %}
 {% endblock %}

@@ -1,5 +1,27 @@
 from app.app import db
 from datetime import datetime
+from flask import url_for
+
+
+class PaginatedAPIMixin(object):
+    @staticmethod
+    def to_collection_dict(query, page, per_page, endpoint, **kwargs):
+        resources = query.paginate(page, per_page, False)
+        data = {
+            'items': [item.to_dict() for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            },
+            '_links': {
+                'self': url_for(endpoint, page=page, per_page=per_page, **kwargs),
+                'next': url_for(endpoint, page=page + 1, per_page=per_page, **kwargs) if resources.has_next else None,
+                'prev': url_for(endpoint, page=page - 1, per_page=per_page, **kwargs) if resources.has_prev else None
+            }
+        }
+        return data
 
 
 class Resource(db.Model):
@@ -12,7 +34,7 @@ class Resource(db.Model):
         return f'<Resource {self.title}>'
 
 
-class News(db.Model):
+class News(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     header = db.Column(db.String(120), index=True, unique=True)
     link = db.Column(db.String(120), index=True, unique=True)
@@ -22,3 +44,13 @@ class News(db.Model):
     def __repr__(self):
         return f'<News {self.header}>'
 
+    def to_dict(self):
+        data = {
+            'header': self.header,
+            'time': self.timestamp.isoformat() + 'Z',
+            '_links': {
+                'self': self.link,
+                'resource': url_for('api.get_resource_news', id=self.user_id)
+            }
+        }
+        return data

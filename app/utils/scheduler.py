@@ -1,8 +1,5 @@
-from app.parseinfo.parsing import Requestor
+from app.utils.parser import Requestor
 from app.models import Resource, News
-
-
-base_url = ["https://daily.afisha.ru/news/", "https://www.the-village.ru/news"]
 
 
 def add_news(app, db):
@@ -13,7 +10,7 @@ def add_news(app, db):
         village = Resource.query.get(2)
         for new in news:
             for val in new.values():
-                new_post = News.query.filter_by(header=val['title']).first()
+                new_post = News.query.filter_by(link=val['link']).first()
                 if new_post is None:
                     if val['name'] == "afisha":
                         post = News(header=val['title'], link=val['link'], source=afisha, timestamp=val['time'])
