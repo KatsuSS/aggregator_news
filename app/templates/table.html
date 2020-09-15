@@ -9,4 +9,8 @@
         {% for new in news_village %}
             <div><p>{{ new.header }}</p><p><a href="{{ new.link }}">Подробнее</a></p></div>
         {% endfor %}
+    <h3>VC news</h3>
+        {% for new in news_vc %}
+            <div><p>{{ new.header }}</p><p><a href="{{ new.link }}">Подробнее</a></p></div>
+        {% endfor %}
 {% endblock %}

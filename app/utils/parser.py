@@ -4,12 +4,33 @@ import asyncio
 from datetime import datetime, timedelta
 import re
 from app.utils.logger import init_logger
+from typing import List
 
 
 logger = init_logger()
 
 
-def format_time(create_time):
+def format_time_new(create_time: str) -> datetime:
+    """
+    Переформатирует время из (y-m-dTh:m:00.000+03:00) в формат (y-m-d h:m:00)
+    :param create_time: исходная строка(время)
+    :return: время формата y-m-d h:m:00
+    """
+    try:
+        time = re.search(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', create_time).group(0).replace("T", " ")
+    except AttributeError as e:
+        time = datetime.now()
+        logger.info(f"Не получилось выделить время {e}")
+    time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
+    return time
+
+
+def format_time(create_time: str) ->datetime:
+    """
+    Переформатирует время из (h:m) в формат (y-m-d h:m:00)
+    :param create_time: исходная строка(время)
+    :return: время формата y-m-d h:m:00
+    """
     if "ВЧЕРА" in create_time:
         time = datetime.now() - timedelta(days=1)
     else:
@@ -24,52 +45,82 @@ def format_time(create_time):
 
 
 class Requestor:
-    def __init__(self, url):
+    """
+    Класс для парсинга(сбора) информации с СМИ
+    """
+    def __init__(self, url: List[str]):
+        """
+        :param url: список интернет ресурсов
+        """
         self.url = url
 
-    async def _get_page(self, session, url):
+    async def _get_page(self, session, url: str) -> dict:
+        """
+        Получение страницы и вывод нужной информации
+        :param session: текущая сессия
+        :param url: url-адрес страницы
+        :return: полученные распарсеные данные
+        """
         try:
             async with session.get(url) as response:
                 page_content = await response.text()
-                return self._get_page_info(url, page_content)
+                return self._get_page_info(page_content, url)
         except aiohttp.ClientError as err:
+            logger.error(f"Connected er: {err}")
             print(err)
 
-    def _get_page_info(self, url, page_content):
+    def _get_page_info(self, page_content: str, url: str) -> dict:
+        """
+        Вызов нужного парсера в соответсвии со СМИ
+        :param page_content: содержимое страницы
+        :param url: url адрес ресурса
+        :return: распарсенные данные
+        """
         soup = BeautifulSoup(page_content, "lxml")
         if "the-village" in url:
             return self._get_info_village(soup)
         elif "afisha" in url:
             return self._get_info_afisha(soup)
+        elif "vc" in url:
+            return self._get_info_vc(soup)
         else:
             logger.info(f"Пустая страница")
-            return []
+            return {}
 
-    def _get_info_village(self, soup):
+    def _get_info_village(self, soup) -> dict:
+        """
+        Парсинг нужных данных со страницы the-village
+        :param soup: BS4
+        :return: dict данных
+        """
         url = "https://www.the-village.ru"
         data = {}
-        ads = soup.find('div', class_="p-news").find('div', class_='block-justifier').find_all('div', class_="post-item")
+        break_space = u'\xa0'
+        ads = soup.find('div', class_="application-components-base-Layout--Layout__gridColumnLeft3x")\
+            .find_all('div', class_='application-components-base-NewsBlockCard--NewsBlockCard__container')
         for key, ad in enumerate(ads):
             try:
-                title = ad.find(["h2", "h3"], class_="post-title").getText().strip()
-                link = ad.find("a", class_="post-link")['href']
+                title = ad.find("h3", class_="application-components-base-NewsBlockCard--NewsBlockCard__title")\
+                    .getText().strip().replace(break_space, ' ')
+                link = ad.find("a", class_="application-components-base-NewsBlockCard--NewsBlockCard__link")["href"]
+                create_time = ad.find("div", class_="application-components-base-Layout--Layout__hidden")\
+                    .find("time").getText().strip()
             except AttributeError as e:
                 logger.error(f"Tags changed village: {e}")
                 continue
-            try:
-                create_time = ad.find("li", class_="meta-time").getText().strip()
-            except AttributeError as e:
-                print(e)
-                logger.info(f"Different fields: {e}")
-                create_time = ad.find("span", class_="post-time").getText().strip()
-            create_time = format_time(create_time)
+            create_time = format_time_new(create_time)
             data[key] = {"title": title,
                          "name": "the-village",
                          "link": url + link,
                          "time": create_time}
         return data
 
-    def _get_info_afisha(self, soup):
+    def _get_info_afisha(self, soup) -> dict:
+        """
+        Парсинг нужных данных со страницы afisha
+        :param soup: BS4
+        :return: dict данных
+        """
         url = "https://daily.afisha.ru"
         data = {}
         break_space = u'\xa0'
@@ -90,25 +141,57 @@ class Requestor:
                          "time": create_time}
         return data
 
-    async def _create_task(self, url):
+    def _get_info_vc(self, soup):
+        """
+        Парсинг нужных данных со страницы vc.ru
+        :param soup: BS4
+        :return: dict данных
+        """
+        data = {}
+        ads = soup.find('div', class_="news_widget__content__inner").find_all("div", class_="news_item")
+        for key, ad in enumerate(ads):
+            try:
+                title = ad.find("a", class_="news_item__title").getText().strip()
+                create_time = ad.find("time", class_="time").getText().strip()
+                link = ad.find("a", class_="news_item__title")['href']
+            except AttributeError as e:
+                logger.error(f"Tags changed afisha: {e}")
+                continue
+            create_time = format_time(create_time)
+            data[key] = {"title": title,
+                         "name": "vc",
+                         "link": link,
+                         "time": create_time}
+        return data
+
+    async def _create_task(self) -> list:
+        """
+        Создание тасков для выполнения
+        :return:
+        """
         tasks = []
         async with aiohttp.ClientSession() as session:
-            for page in url:
+            for page in self.url:
                 task = asyncio.ensure_future(self._get_page(session, page))
                 tasks.append(task)
             result = await asyncio.gather(*tasks)
             return result
 
-    def get_request(self):
+    def get_request(self) -> list:
+        """
+        Запуск
+        :return:
+        """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         # loop = asyncio.get_event_loop()
-        data = loop.run_until_complete(self._create_task(self.url))
+        data = loop.run_until_complete(self._create_task())
         return data
 
 #
 # if __name__ == "__main__":
-#     res = Requestor(["https://daily.afisha.ru/news/", "https://www.the-village.ru/news"])
+#     res = Requestor(["https://daily.afisha.ru/news/", "https://www.the-village.ru/shorts", "https://vc.ru/"])
+#     # res = Requestor(["https://vc.ru/"])
 #     news = res.get_request()
 #     from pprint import pprint
 #     pprint(news)

@@ -18,7 +18,7 @@ def create_app(config_class=Config):
 
     from app.utils.scheduler import add_news
     scheduler = BackgroundScheduler()
-    scheduler.add_job(add_news, 'interval', args=[app, db], seconds=10)
+    scheduler.add_job(add_news, 'interval', args=[app, db], minutes=10)
     scheduler.start()
 
     from app.main import bp as main_bp
