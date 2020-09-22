@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>Afisha news</h3>
-        {% for new in news_afisha %}
-            <div><p>{{ new.header }}</p><p>Link: <a href="{{ new.link }}">Подробнее</a></p></div>
-        {% endfor %}
-    <h3>The-Village news</h3>
-        {% for new in news_village %}
-            <div><p>{{ new.header }}</p><p><a href="{{ new.link }}">Подробнее</a></p></div>
-        {% endfor %}
-    <h3>VC news</h3>
-        {% for new in news_vc %}
-            <div><p>{{ new.header }}</p><p><a href="{{ new.link }}">Подробнее</a></p></div>
-        {% endfor %}
+    <div class="container">
+      <div class="row">
+       {% for name, resource in all_news.items() %}
+        <div class="col-md-4 col-sm-4 col-xs-12">
+          <!-- Блок 1 -->
+          <div class="wp-block inverse no-margin">
+            <h3>
+                <a href="{{ url_for('main.'+name) }}">{{ name|title +" news"}}</a>
+                <span class="link-sites"><a href="{{ resource.link }}">(сайт)</a></span>
+            </h3>
+            <ul class="list-group list-group-flush">
+                {% for new in resource.news %}
+                    <li class="list-group-item">
+                        <a class="one-line-ellipsis" href="{{ new.link }}">{{ new.header|truncate(42, True) }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+     </div>
+</div>
 {% endblock %}

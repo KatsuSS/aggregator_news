@@ -1,19 +1,36 @@
-<html>
-    <head>
-      {% if title %}
-      <title>{{ title }} - Agregator</title>
-      {% else %}
-      <title>Welcome to Agregator</title>
-      {% endif %}
-    </head>
-    <body>
-        <div>Agregator:
-            <a href="{{ url_for('main.index') }}">Home</a>
-            <a href="{{ url_for('main.afisha') }}">Afisha</a>
-            <a href="{{ url_for('main.village') }}">The-Village</a>
-            <a href="{{ url_for('main.vc') }}">VC</a>
+{% extends 'bootstrap/base.html' %}
+
+
+{% block title %}
+    {% if title %}{{ title }} - Aggregator{% else %}Welcome to Aggregator{% endif %}
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='style.css')}}">
+{% endblock %}
+
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">Aggregator</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.afisha') }}">Afisha</a></li>
+                    <li><a href="{{ url_for('main.village') }}">The-Village</a></li>
+                    <li><a href="{{ url_for('main.vc') }}">VC</a></li>
+                </ul>
+            </div>
         </div>
-        <hr>
-        {% block content %}{% endblock %}
-    </body>
-</html>
+    </nav>
+{% endblock %}
+{% block content %}{% endblock %}

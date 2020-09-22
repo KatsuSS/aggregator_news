@@ -1,15 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>{{ title }}</h3>
+
+    <div class="container">
+      <div class="row">
+         <div class="col-md-10 col-md-offset-1 header-h2">
+             <h2>{{ title }}</h2>
+         </div>
         {% for new in news %}
-            <div><p>{{ new.header }}</p><p>Link: <a href="{{ new.link }}">Подробнее</a></p></div>
-        {% endfor %}
-    <span>Страницы: </span>
-    {% if prev_url %}
-    <a href="{{ prev_url }}">Предыдущая </a>
-    {% endif %}
-    {% if next_url %}
-    <a href="{{ next_url }}">Следующая </a>
-    {% endif %}
+        <div class="col-md-10 col-md-offset-1">
+          <div class="wp-block property list">
+            <div class="wp-block-body">
+              <div class="wp-block-content">
+                <small>
+                 <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{ new.timestamp  }}
+                </small>
+                <h4 class="content-title">Новости</h4>
+                <p class="description">{{ new.header }}</p>
+                <span class="pull-right">
+                  <span class="capacity">
+                    <i class="fa fa-user"></i> <a href="{{ new.link }}">Подробнее</a>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+
+<nav class="text-center" aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item {% if not prev_url %} disabled{% endif %}">
+      <a class="page-link" href="{{ prev_url or '#' }}" tabindex="-1">Previous</a>
+    </li>
+    <li class="page-item{% if not next_url %} disabled{% endif %}">
+      <a class="page-link" href="{{ next_url or '#' }}">Next</a>
+    </li>
+  </ul>
+</nav>
 {% endblock %}

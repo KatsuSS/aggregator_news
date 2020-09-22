@@ -1,5 +1,6 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
+# static = os.path.join(basedir, 'app\static')
 
 
 class Config(object):
