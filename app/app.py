@@ -4,11 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_bootstrap import Bootstrap
+from flask_caching import Cache
 
 
 db = SQLAlchemy()
 migrate = Migrate()
 bootstrap = Bootstrap()
+cache = Cache()
 
 #TODO: Redis add?
 def create_app(config_class=Config):
@@ -18,6 +20,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     bootstrap.init_app(app)
+    cache.init_app(app)
 
     from app.utils.scheduler import add_news
     scheduler = BackgroundScheduler()

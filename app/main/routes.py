@@ -2,9 +2,11 @@ from flask import render_template, url_for, request, current_app
 from app.models import News, Resource
 from app.main import bp
 from datetime import datetime, timedelta
+from app.app import cache
 
 
 @bp.route('/', methods=['GET'])
+@cache.cached(timeout=120)
 def index():
     since = datetime.now() - timedelta(hours=24)
     all_news = {
@@ -33,6 +35,7 @@ def index():
 
 
 @bp.route('/afisha', methods=['GET'])
+@cache.cached(timeout=120, query_string=True)
 def afisha():
     page = request.args.get('page', 1, type=int)
     news = News.query.filter_by(user_id=1).order_by(News.timestamp.desc())\
@@ -43,6 +46,7 @@ def afisha():
 
 
 @bp.route('/village', methods=['GET'])
+@cache.cached(timeout=120, query_string=True)
 def village():
     page = request.args.get('page', 1, type=int)
     news = News.query.filter_by(user_id=2).order_by(News.timestamp.desc())\
@@ -53,6 +57,7 @@ def village():
 
 
 @bp.route('/vc', methods=['GET'])
+@cache.cached(timeout=120, query_string=True)
 def vc():
     page = request.args.get('page', 1, type=int)
     news = News.query.filter_by(user_id=3).order_by(News.timestamp.desc())\
