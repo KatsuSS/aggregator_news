@@ -2,12 +2,12 @@ import pytest
 from flask import url_for
 
 
-def test_first(client):
+def test_get_home_page(client):
     res = client.get(url_for("main.index"))
     assert res.status_code == 200
 
 
-def test_second(client):
+def test_get_new_with_id(client):
     res = client.get(url_for("api.get_new", id=1))
     assert res.status_code == 200
     assert res.json == {

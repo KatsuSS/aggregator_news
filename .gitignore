@@ -23,3 +23,6 @@ venv/
 
 *.log
 
+.pytest_cache
+
+.env

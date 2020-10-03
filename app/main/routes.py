@@ -26,8 +26,6 @@ def index():
             all_news['village']["news"].append(new)
         elif new.source.title == 'vc':
             all_news['vc']["news"].append(new)
-    # for res in resources:
-    #     all_news[res.title]["link"] = res.home_page
     all_news['afisha']["link"] = resources[0].home_page
     all_news['village']["link"] = resources[1].home_page
     all_news['vc']["link"] = resources[2].home_page
@@ -65,21 +63,3 @@ def vc():
     next_url = url_for('main.vc', page=news.next_num) if news.has_next else None
     prev_url = url_for('main.vc', page=news.prev_num) if news.has_prev else None
     return render_template("news.html", news=news.items, title="VC", next_url=next_url, prev_url=prev_url)
-
-
-# #TODO: Объединить все 3 view - видоизменение (Mixin)?
-# @bp.route('/vc', methods=['GET'])
-# @bp.route('/afisha', methods=['GET'])
-# @bp.route('/the-village', methods=['GET'])
-# def news():
-#     data = {"afisha": 1,
-#             "the-village": 2,
-#             "vc": 3}
-#     path = request.path[1:]
-#     print(path)
-#     page = request.args.get('page', 1, type=int)
-#     news = News.query.filter_by(user_id=data[path]).order_by(News.timestamp.desc())\
-#         .paginate(page, current_app.config['POSTS_PER_PAGE'], False)
-#     next_url = url_for(f'main.{path}', page=news.next_num) if news.has_next else None
-#     prev_url = url_for(f'main.{path}', page=news.prev_num) if news.has_prev else None
-#     return render_template("news.html", news=news.items, title=path.title(), next_url=next_url, prev_url=prev_url)

@@ -25,7 +25,7 @@ def format_time_new(create_time: str) -> datetime:
     return time
 
 
-def format_time(create_time: str) ->datetime:
+def format_time(create_time: str) -> datetime:
     """
     Переформатирует время из (h:m) в формат (y-m-d h:m:00)
     :param create_time: исходная строка(время)
@@ -184,14 +184,5 @@ class Requestor:
         """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        # loop = asyncio.get_event_loop()
         data = loop.run_until_complete(self._create_task())
         return data
-
-#
-# if __name__ == "__main__":
-#     res = Requestor(["https://daily.afisha.ru/news/", "https://www.the-village.ru/shorts", "https://vc.ru/"])
-#     # res = Requestor(["https://vc.ru/"])
-#     news = res.get_request()
-#     from pprint import pprint
-#     pprint(news)

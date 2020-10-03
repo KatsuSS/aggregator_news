@@ -3,6 +3,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from apscheduler.schedulers.background import BackgroundScheduler
+from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
 from flask_caching import Cache
 
@@ -11,8 +12,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 bootstrap = Bootstrap()
 cache = Cache()
+load_dotenv()
 
-#TODO: Redis add?
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
