@@ -1,8 +1,9 @@
-from flask import render_template, url_for, request, current_app
+from flask import render_template, request, current_app
 from app.models import News, Resource
 from app.main import bp
 from datetime import datetime, timedelta
 from app.app import cache
+from app.main.services import create_next_prev_page, get_news_per_page
 
 
 @bp.route('/', methods=['GET'])
@@ -35,31 +36,28 @@ def index():
 @bp.route('/afisha', methods=['GET'])
 @cache.cached(timeout=120, query_string=True)
 def afisha():
-    page = request.args.get('page', 1, type=int)
-    news = News.query.filter_by(user_id=1).order_by(News.timestamp.desc())\
-        .paginate(page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.afisha', page=news.next_num) if news.has_next else None
-    prev_url = url_for('main.afisha', page=news.prev_num) if news.has_prev else None
-    return render_template("news.html", news=news.items, title="Afisha", next_url=next_url, prev_url=prev_url)
+    resource_id = current_app.config['RESOURCE_ID'][request.path[1:]]
+    news_per_page = get_news_per_page(resource_id)
+    next_url, prev_url = create_next_prev_page("afisha", news_per_page)
+    return render_template("news.html", news=news_per_page.items, title="Afisha",
+                           next_url=next_url, prev_url=prev_url)
 
 
 @bp.route('/village', methods=['GET'])
 @cache.cached(timeout=120, query_string=True)
 def village():
-    page = request.args.get('page', 1, type=int)
-    news = News.query.filter_by(user_id=2).order_by(News.timestamp.desc())\
-        .paginate(page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.village', page=news.next_num) if news.has_next else None
-    prev_url = url_for('main.village', page=news.prev_num) if news.has_prev else None
-    return render_template("news.html", news=news.items, title="The-Village", next_url=next_url, prev_url=prev_url)
+    resource_id = current_app.config['RESOURCE_ID'][request.path[1:]]
+    news_per_page = get_news_per_page(resource_id)
+    next_url, prev_url = create_next_prev_page("village", news_per_page)
+    return render_template("news.html", news=news_per_page.items, title="The-Village",
+                           next_url=next_url, prev_url=prev_url)
 
 
 @bp.route('/vc', methods=['GET'])
 @cache.cached(timeout=120, query_string=True)
 def vc():
-    page = request.args.get('page', 1, type=int)
-    news = News.query.filter_by(user_id=3).order_by(News.timestamp.desc())\
-        .paginate(page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.vc', page=news.next_num) if news.has_next else None
-    prev_url = url_for('main.vc', page=news.prev_num) if news.has_prev else None
-    return render_template("news.html", news=news.items, title="VC", next_url=next_url, prev_url=prev_url)
+    resource_id = current_app.config['RESOURCE_ID'][request.path[1:]]
+    news_per_page = get_news_per_page(resource_id)
+    next_url, prev_url = create_next_prev_page("vc", news_per_page)
+    return render_template("news.html", news=news_per_page.items, title="VC",
+                           next_url=next_url, prev_url=prev_url)

@@ -8,5 +8,10 @@ class Config(object):
     POSTS_PER_PAGE = 5
     CACHE_TYPE = "simple"
     CACHE_DEFAULT_TIMEOUT = 300
+    RESOURCE_ID = {
+        "afisha": 1,
+        "village": 2,
+        "vc": 3
+    }
 
 
