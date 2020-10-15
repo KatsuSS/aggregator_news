@@ -95,24 +95,18 @@ class Requestor:
         """
         url = "https://www.the-village.ru"
         data = {}
-        break_space = u'\xa0'
-        ads = soup.find('div', class_="application-components-base-Layout--Layout__gridColumnLeft3x")\
-            .find_all('div', class_='application-components-base-NewsBlockCard--NewsBlockCard__container')
-        for key, ad in enumerate(ads):
-            try:
-                title = ad.find("h3", class_="application-components-base-NewsBlockCard--NewsBlockCard__title")\
-                    .getText().strip().replace(break_space, ' ')
-                link = ad.find("a", class_="application-components-base-NewsBlockCard--NewsBlockCard__link")["href"]
-                create_time = ad.find("div", class_="application-components-base-Layout--Layout__hidden")\
-                    .find("time").getText().strip()
-            except AttributeError as e:
-                logger.error(f"Tags changed village: {e}")
-                continue
-            create_time = format_time_new(create_time)
-            data[key] = {"title": title,
-                         "name": "the-village",
-                         "link": url + link,
-                         "time": create_time}
+        ads = _get_posts_village(soup)
+        if ads:
+            for key, ad in enumerate(ads):
+                try:
+                    title, link, create_time = _get_post_attributes_village(ad)
+                except AttributeError:
+                    continue
+                create_time = format_time_new(create_time)
+                data[key] = {"title": title,
+                             "name": "the-village",
+                             "link": url + link,
+                             "time": create_time}
         return data
 
     def _get_info_afisha(self, soup) -> dict:
@@ -123,22 +117,18 @@ class Requestor:
         """
         url = "https://daily.afisha.ru"
         data = {}
-        break_space = u'\xa0'
-        ads = soup.find('div', class_="news-feed").find('div', attrs={"data-page-counter": "1"})\
-            .find_all("div", class_="news-feed__item")
-        for key, ad in enumerate(ads):
-            try:
-                title = ad.find("a", class_="news-feed__title").getText().strip().replace(break_space, ' ')
-                create_time = ad.find("span", class_="news-feed__datetime").getText().strip()
-                link = ad.find("a", class_="news-feed__title")['href']
-            except AttributeError as e:
-                logger.error(f"Tags changed afisha: {e}")
-                continue
-            create_time = format_time(create_time)
-            data[key] = {"title": title,
-                         "name": "afisha",
-                         "link": url + link,
-                         "time": create_time}
+        ads = _get_posts_afisha(soup)
+        if ads:
+            for key, ad in enumerate(ads):
+                try:
+                    title, link, create_time = _get_post_attributes_afisha(ad)
+                except AttributeError:
+                    continue
+                create_time = format_time(create_time)
+                data[key] = {"title": title,
+                             "name": "afisha",
+                             "link": url + link,
+                             "time": create_time}
         return data
 
     def _get_info_vc(self, soup):
@@ -148,20 +138,18 @@ class Requestor:
         :return: dict данных
         """
         data = {}
-        ads = soup.find('div', class_="news_widget__content__inner").find_all("div", class_="news_item")
-        for key, ad in enumerate(ads):
-            try:
-                title = ad.find("a", class_="news_item__title").getText().strip()
-                create_time = ad.find("time", class_="time").getText().strip()
-                link = ad.find("a", class_="news_item__title")['href']
-            except AttributeError as e:
-                logger.error(f"Tags changed afisha: {e}")
-                continue
-            create_time = format_time(create_time)
-            data[key] = {"title": title,
-                         "name": "vc",
-                         "link": link,
-                         "time": create_time}
+        ads = _get_posts_vc(soup)
+        if ads:
+            for key, ad in enumerate(ads):
+                try:
+                    title, link, create_time = _get_post_attributes_vc(ad)
+                except AttributeError as e:
+                    continue
+                create_time = format_time(create_time)
+                data[key] = {"title": title,
+                             "name": "vc",
+                             "link": link,
+                             "time": create_time}
         return data
 
     async def _create_task(self) -> list:
@@ -186,3 +174,87 @@ class Requestor:
         asyncio.set_event_loop(loop)
         data = loop.run_until_complete(self._create_task())
         return data
+
+
+def _get_posts_village(soup):
+    """
+    Получть все посты на странице
+    """
+    try:
+        ads = soup.find('div', class_="application-components-base-Layout--Layout__gridColumnLeft3x") \
+            .find_all('div', class_='application-components-base-NewsBlockCard--NewsBlockCard__container')
+    except AttributeError as e:
+        logger.error(f"Tags changed village: {e}")
+        ads = None
+    return ads
+
+
+def _get_post_attributes_village(ad) -> (str, str, str):
+    """
+    Получить атрибуты поста: название, ссылку и время
+    """
+    break_space = u'\xa0'
+    try:
+        title = ad.find("h3", class_="application-components-base-NewsBlockCard--NewsBlockCard__title") \
+            .getText().strip().replace(break_space, ' ')
+        link = ad.find("a", class_="application-components-base-NewsBlockCard--NewsBlockCard__link")["href"]
+        create_time = ad.find("div", class_="application-components-base-Layout--Layout__hidden") \
+            .find("time").getText().strip()
+    except AttributeError as e:
+        logger.error(f"Tags changed village: {e}")
+        raise AttributeError
+    return title, link, create_time
+
+
+def _get_posts_afisha(soup):
+    """
+    Получть все посты на странице
+    """
+    try:
+        ads = soup.find('div', class_="news-feed").find('div', attrs={"data-page-counter": "1"})\
+            .find_all("div", class_="news-feed__item")
+    except AttributeError as e:
+        logger.error(f"Tags changed afisha: {e}")
+        ads = None
+    return ads
+
+
+def _get_post_attributes_afisha(ad) -> (str, str, str):
+    """
+    Получить атрибуты поста: название, ссылку и время
+    """
+    break_space = u'\xa0'
+    try:
+        title = ad.find("a", class_="news-feed__title").getText().strip().replace(break_space, ' ')
+        create_time = ad.find("span", class_="news-feed__datetime").getText().strip()
+        link = ad.find("a", class_="news-feed__title")['href']
+    except AttributeError as e:
+        logger.error(f"Tags changed afisha: {e}")
+        raise AttributeError
+    return title, link, create_time
+
+
+def _get_posts_vc(soup):
+    """
+    Получть все посты на странице
+    """
+    try:
+        ads = soup.find('div', class_="news_widget__content__inner").find_all("div", class_="news_item")
+    except AttributeError as e:
+        logger.error(f"Tags changed vc: {e}")
+        ads = None
+    return ads
+
+
+def _get_post_attributes_vc(ad) -> (str, str, str):
+    """
+    Получить атрибуты поста: название, ссылку и время
+    """
+    try:
+        title = ad.find("a", class_="news_item__title").getText().strip()
+        create_time = ad.find("time", class_="time").getText().strip()
+        link = ad.find("a", class_="news_item__title")['href']
+    except AttributeError as e:
+        logger.error(f"Tags changed vc: {e}")
+        raise AttributeError
+    return title, link, create_time
