@@ -13,7 +13,11 @@ def get_new(id: int) -> dict:
 @bp.route('/news', methods=['GET'])
 def get_news() -> dict:
     page, per_page = get_number_posts_per_page(request)
-    data = News.to_collection_dict(News.query.order_by(News.timestamp.desc()), page, per_page, 'api.get_news')
+    last_post_id = request.args.get('id', None, type=int)
+    if last_post_id:
+        data = News.to_collection_dict(News.query.filter(News.id >= last_post_id), page, per_page, 'api.get_news')
+    else:
+        data = News.to_collection_dict(News.query.order_by(News.timestamp.desc()), page, per_page, 'api.get_news')
     return jsonify(data)
 
 

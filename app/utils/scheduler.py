@@ -22,11 +22,11 @@ def add_news(app, db) -> None:
             for val in new.values():
                 if val['time'] > last_news.timestamp:
                     if val['name'] == "afisha":
-                        db.session.add(_create_new_in_db(val, resource[0]))
+                        db.session.add(create_new_in_db(val, resource[0]))
                     elif val['name'] == "the-village":
-                        db.session.add(_create_new_in_db(val, resource[1]))
+                        db.session.add(create_new_in_db(val, resource[1]))
                     elif val['name'] == "vc":
-                        db.session.add(_create_new_in_db(val, resource[2]))
+                        db.session.add(create_new_in_db(val, resource[2]))
         try:
             db.session.commit()
         except Exception as e:
@@ -34,6 +34,6 @@ def add_news(app, db) -> None:
             logger.error(f"Ошибка добавления в БД: {e}")
 
 
-def _create_new_in_db(new, source):
+def create_new_in_db(new, source):
     """Создание новости(поста) с параметрами"""
-    return News(header=new['title'], link=new['link'], source=source, timestamp=new['time'])
+    return News(header=new['title'], link=new['link'], source=source, timestamp=new['time'], body=new['body'])

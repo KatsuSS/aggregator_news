@@ -19,7 +19,7 @@
                 <p class="description">{{ new.header }}</p>
                 <span class="pull-right">
                   <span class="capacity">
-                    <i class="fa fa-user"></i> <a href="{{ new.link }}">Подробнее</a>
+                    <i class="fa fa-user"></i> <a href="{{ url_for('main.one_post', id=new.id) }}">Подробнее</a>
                   </span>
                 </span>
               </div>

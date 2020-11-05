@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+          <div class="wp-block property list">
+            <div class="wp-block-body">
+              <div class="wp-block-content">
+                <small>
+                 <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{ post.timestamp  }}
+                </small>
+                <h4 class="content-title">{{ post.header }}</h4>
+                <p class="description">{{ post.body }}</p>
+                <span class="pull-right">
+                  <span class="capacity">
+                    <i class="fa fa-user"></i> <a href="{{ post.link }}">Источник</a>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

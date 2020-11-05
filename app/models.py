@@ -37,6 +37,7 @@ class Resource(db.Model):
 class News(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     header = db.Column(db.String(120), index=True, unique=True)
+    body = db.Column(db.Text)
     link = db.Column(db.String(120), index=True, unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('resource.id'))
@@ -47,6 +48,7 @@ class News(PaginatedAPIMixin, db.Model):
     def to_dict(self):
         data = {
             'header': self.header,
+            'body': self.body,
             'time': self.timestamp.isoformat() + 'Z',
             '_links': {
                 'self': self.link,

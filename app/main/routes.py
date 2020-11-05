@@ -3,6 +3,7 @@ from app.main import bp
 from app.app import cache
 from app.main.services import create_next_prev_page, get_news_per_page, \
     get_news_for_last_day, structure_news_by_resource
+from app.models import News
 
 
 @bp.route('/', methods=['GET'])
@@ -21,6 +22,13 @@ def afisha():
     next_url, prev_url = create_next_prev_page("afisha", news_per_page)
     return render_template("news.html", news=news_per_page.items, title="Afisha",
                            next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/post/<int:id>', methods=['GET'])
+@cache.cached(timeout=120, query_string=True)
+def one_post(id: int):
+    post = News.query.get_or_404(id)
+    return render_template("post.html", post=post)
 
 
 @bp.route('/village', methods=['GET'])
