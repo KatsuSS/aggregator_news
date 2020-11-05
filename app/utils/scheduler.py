@@ -20,7 +20,7 @@ def add_news(app, db) -> None:
         last_news = News.query.order_by(News.timestamp.desc()).first()
         for new in news:
             for val in new.values():
-                if val['time'] > last_news.timestamp:
+                if not last_news or val['time'] > last_news.timestamp:
                     if val['name'] == "afisha":
                         db.session.add(create_new_in_db(val, resource[0]))
                     elif val['name'] == "the-village":
