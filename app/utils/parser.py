@@ -189,7 +189,7 @@ class Requestor:
         tasks = []
         async with aiohttp.ClientSession() as session:
             for page in self.url:
-                task = asyncio.create_task(self._get_page(session, page))
+                task = asyncio.ensure_future(self._get_page(session, page))
                 tasks.append(task)
             result = await asyncio.gather(*tasks)
             return result
