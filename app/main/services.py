@@ -47,3 +47,10 @@ def structure_news_by_resource(news: list) -> Dict:
     structured_news['village']["link"] = resources[1].home_page
     structured_news['vc']["link"] = resources[2].home_page
     return structured_news
+
+
+def get_resource_news_on_the_page(name_resource):
+    resource_id = current_app.config['RESOURCE_ID'][request.path[1:]]
+    news_per_page = get_news_per_page(resource_id)
+    next_url, prev_url = create_next_prev_page(name_resource, news_per_page)
+    return news_per_page, next_url, prev_url
